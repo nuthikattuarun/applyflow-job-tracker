@@ -1,5 +1,6 @@
 
 import { useState } from 'react'
+import { recordActivity } from '../../../lib/activityLog.js'
 
 const STORAGE_KEY = 'applyflow_interviews'
 const APPLICATIONS_KEY = 'applyflow_applications'
@@ -86,17 +87,35 @@ export default function InterviewsPage() {
       ]
     }
 
-    setInterviews(updated)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
-    closeForm()
+
+
+   setInterviews(updated)
+localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
+
+recordActivity(
+  editingInterview ? 'Interview updated' : 'Interview scheduled',
+  'Interviews',
+  `${form.type} interview on ${form.date}`,
+)
+
+closeForm()
   }
 
   function handleDelete(id) {
+    const deletedInterview = interviews.find((item) => item.id === id)
     if (!window.confirm('Delete this interview?')) return
 
     const updated = interviews.filter((item) => item.id !== id)
     setInterviews(updated)
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
+
+    if (deletedInterview) {
+      recordActivity(
+        'Interview deleted',
+        'Interviews',
+        `${deletedInterview.type} interview on ${deletedInterview.date}`,
+      )
+    }
   }
 
   function getApplicationLabel(applicationId) {
@@ -138,7 +157,6 @@ export default function InterviewsPage() {
     .sort((a, b) =>
       `${a.date}T${a.time}`.localeCompare(`${b.date}T${b.time}`),
     )
-
   const inputClass =
     'w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100'
 

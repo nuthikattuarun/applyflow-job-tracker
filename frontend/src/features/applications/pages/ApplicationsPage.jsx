@@ -1,6 +1,8 @@
 
 import { useState } from 'react'
 import ApplicationForm from '../components/ApplicationForm.jsx'
+import { recordActivity } from '../../../lib/activityLog.js'
+import { writeStorage } from '../../../lib/applyflowStorage.js'
 
 const STORAGE_KEY = 'applyflow_applications'
 
@@ -48,12 +50,23 @@ export default function ApplicationsPage() {
     }
 
     setApplications(updatedApplications)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedApplications))
+   writeStorage(STORAGE_KEY, updatedApplications)
+
+    recordActivity(
+      editingApplication ? 'Application updated' : 'Application created',
+      'Applications',
+      `${formData.role} at ${formData.company}`,
+    )
+
     setShowForm(false)
     setEditingApplication(null)
   }
 
   function handleDeleteApplication(id) {
+    const deletedApplication = applications.find(
+      (application) => application.id === id,
+    )
+
     if (!window.confirm('Are you sure you want to delete this application?')) {
       return
     }
@@ -63,7 +76,15 @@ export default function ApplicationsPage() {
     )
 
     setApplications(updatedApplications)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedApplications))
+    writeStorage(STORAGE_KEY, updatedApplications)
+
+    if (deletedApplication) {
+      recordActivity(
+        'Application deleted',
+        'Applications',
+        `${deletedApplication.role} at ${deletedApplication.company}`,
+      )
+    }
   }
 
   function closeForm() {

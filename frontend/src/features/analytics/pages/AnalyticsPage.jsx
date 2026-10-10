@@ -1,5 +1,6 @@
 
-import { useMemo } from 'react'
+import { useEffect, useState } from 'react'
+import { readStorage, subscribeStorage } from '../../../lib/applyflowStorage.js'
 
 const STORAGE_KEY = 'applyflow_applications'
 
@@ -24,7 +25,13 @@ const stages = [
 ]
 
 export default function AnalyticsPage() {
-  const applications = useMemo(loadApplications, [])
+ const [applications, setApplications] = useState(() =>
+  readStorage('applyflow_applications'),
+)
+
+useEffect(() => {
+  return subscribeStorage('applyflow_applications', setApplications)
+}, [])
 
   const total = applications.length
 

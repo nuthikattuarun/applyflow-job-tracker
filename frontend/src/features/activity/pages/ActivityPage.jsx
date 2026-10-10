@@ -1,5 +1,5 @@
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const STORAGE_KEY = 'applyflow_activity'
 
@@ -34,6 +34,24 @@ export default function ActivityPage() {
   const [activities, setActivities] = useState(loadActivities)
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('All activities')
+
+  useEffect(() => {
+  function refreshActivities() {
+    setActivities(loadActivities())
+  }
+
+  window.addEventListener(
+    'applyflow:activity-updated',
+    refreshActivities,
+  )
+
+  return () => {
+    window.removeEventListener(
+      'applyflow:activity-updated',
+      refreshActivities,
+    )
+  }
+}, [])
 
   function clearActivities() {
     if (!activities.length) return

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { recordActivity } from '../../../lib/activityLog.js'
 
 const STORAGE_KEY = 'applyflow_companies'
 
@@ -62,10 +63,18 @@ export default function CompaniesPage() {
 
     setCompanies(updatedCompanies)
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedCompanies))
+
+    recordActivity(
+      editingCompany ? 'Company updated' : 'Company created',
+      'Companies',
+      companyData.name,
+    )
+
     closeForm()
   }
 
   function handleDelete(id) {
+    const deletedCompany = companies.find((company) => company.id === id)
     if (!window.confirm('Delete this company?')) return
 
     const updatedCompanies = companies.filter(
@@ -74,6 +83,14 @@ export default function CompaniesPage() {
 
     setCompanies(updatedCompanies)
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedCompanies))
+
+    if (deletedCompany) {
+      recordActivity(
+        'Company deleted',
+        'Companies',
+        deletedCompany.name,
+      )
+    }
   }
 
   const filteredCompanies = companies.filter((company) =>
